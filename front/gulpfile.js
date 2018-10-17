@@ -6,11 +6,25 @@ var paths = {
     jade: 'partials/contrib/*.jade',
     coffee: 'coffee/*.coffee',
     images: 'images/**/*',
-    dist: 'dist/'
+    dist: 'dist/',
+    modules: 'node_modules/'
 };
+paths.libs = [
+  paths.modules + 'url-join/lib/url-join.js'
+];
+
+paths.libs.forEach(function(file) {
+    try {
+        // Query the entry
+        stats = fs.lstatSync(file);
+    }
+    catch (e) {
+        console.log(file);
+    }
+});
 
 gulp.task('copy-config', function() {
-    return gulp.src('fas-openid-auth.json')
+    return gulp.src('oidc-auth.json')
         .pipe(gulp.dest(paths.dist));
 });
 
@@ -26,7 +40,7 @@ gulp.task('compile', function() {
         .pipe($.jade({pretty: true}))
         .pipe($.angularTemplatecache({
             transformUrl: function(url) {
-                return '/plugins/fas-openid-auth/' + url;
+                return '/plugins/oidc-auth/' + url;
             }
         }))
         .pipe($.remember('jade'));
@@ -37,8 +51,13 @@ gulp.task('compile', function() {
         .pipe($.coffee())
         .pipe($.remember('coffee'));
 
-    return merge(jade, coffee)
-        .pipe($.concat('fas_openid_auth.js'))
+    var libs = gulp.src(paths.libs)
+        .pipe($.plumber())
+        .pipe($.cached('libs'))
+        .pipe($.remember('libs'));
+
+    return merge(jade, coffee, libs)
+        .pipe($.concat('oidc_auth.js'))
         .pipe($.uglify({mangle:false, preserveComments: false}))
         .pipe(gulp.dest(paths.dist));
 });

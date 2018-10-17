@@ -1,7 +1,5 @@
-# Copyright (C) 2014 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014 Jesús Espino <jespinog@gmail.com>
-# Copyright (C) 2014 David Barragán <bameda@dbarragan.com>
 # Copyright (C) 2015 Ralph Bean <rbean@redhat.com>
+# Copyright (C) 2018 Aurelien Bompard <aurelien@bompard.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -18,13 +16,7 @@
 
 from django.apps import AppConfig
 
-class TaigaContribFASOpenIDAuthAppConfig(AppConfig):
-    name = "taiga_contrib_fas_openid_auth"
-    verbose_name = "Taiga contrib FAS OpenID auth App Config"
 
-    def ready(self):
-        from taiga.auth.services import register_auth_plugin
-        from . import services
-        register_auth_plugin("fas-openid", services.fas_openid_login_func)
-        register_auth_plugin(None, services.fas_openid_login_func)
-
+class TaigaContribOIDCAuthAppConfig(AppConfig):
+    name = "taiga_contrib_oidc_auth"
+    verbose_name = "Taiga contrib OIDC auth App Config"

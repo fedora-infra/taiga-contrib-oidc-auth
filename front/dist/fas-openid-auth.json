@@ -1,8 +1,0 @@
-{
-    "slug": "fas-openid-auth",
-    "name": "FAS Auth",
-    "type": "auth",
-    "module": "taigaContrib.fasOpenIDAuth",
-    "template": "/plugins/fas-openid-auth/fas_openid_auth.html",
-    "js": "/plugins/fas-openid-auth/fas_openid_auth.js"
-}

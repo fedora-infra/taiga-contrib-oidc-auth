@@ -1,7 +1,7 @@
-Taiga contrib FAS OpenID auth
-=========================
+Taiga contrib Fedora OIDC auth
+==============================
 
-The Taiga plugin for FAS (Fedora Account System) authentication.
+The Taiga plugin for Fedora's OIDC (OpenID Connect) provider.
 
 Flow diagram
 ------------
@@ -9,20 +9,18 @@ Flow diagram
 Roughly, this is how it works
 
 ```
-taiga-front             taiga-back         fedoauth
----------------------------------------------------
+taiga-front             taiga-back         Fedora OIDC
+------------------------------------------------------
 
- add a FAS
+add an OIDC
   button
     |
     V
-  click  -----ajax------> auth?
+  click  -----------> generate link
                            |
-  hidden <----html---------*
-form, auto
-  submit -----POST-------------------------> auth?
+                           *--302----------> auth?
                                                |
-                   verify and store <---POST---*
+                   verify and store <--GET/302-*
                     user in the db
                            |
   verify <----302----------*
@@ -36,50 +34,83 @@ Installation
 
 ### Taiga Back
 
-In your Taiga back python virtualenv install the pip package `taiga-contrib-fas-openid-auth` with:
+In your Taiga back python virtualenv install the pip package `taiga-contrib-oidc-auth` with:
 
 ```bash
-  pip install taiga-contrib-fas-openid-auth
+  pip install taiga-contrib-oidc-auth
 ```
 
-Modify your settings/local.py and include the line:
+Modify your settings/local.py and include the lines:
 
 ```python
-  INSTALLED_APPS += ["taiga_contrib_fas_openid_auth"]
+INSTALLED_APPS += [
+    "mozilla_django_oidc",
+    "taiga_contrib_oidc_auth",
+]
 
-  # We monkey patch the rest_framework exception handler to allow us to do
-  # the 302 redirects that we need to do for openid to finish.
-  REST_FRAMEWORK[“EXCEPTION_HANDLER”] = "taiga_contrib_fas_openid_auth.services.exception_handler"
+AUTHENTICATION_BACKENDS = list(AUTHENTICATION_BACKENDS) + [
+    "taiga_contrib_oidc_auth.oidc.TaigaOIDCAuthenticationBackend",
+]
+
+# OIDC Settings
+OIDC_CALLBACK_CLASS = "taiga_contrib_oidc_auth.views.TaigaOIDCAuthenticationCallbackView"
+OIDC_RP_SCOPES = "openid profile email"
+OIDC_RP_SIGN_ALGO = "RS256"
+# Set the OIDC provider here.
+OIDC_BASE_URL = "https://id.fedoraproject.org/openidc"
+# Those URL values work for Ipsilon.
+OIDC_OP_JWKS_ENDPOINT = OIDC_BASE_URL + "/Jwks"
+OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_BASE_URL + "/Authorization"
+OIDC_OP_TOKEN_ENDPOINT = OIDC_BASE_URL + "/Token"
+OIDC_OP_USER_ENDPOINT = OIDC_BASE_URL + "/UserInfo"
+# These two are private! Don't commit them to VCS. Getting the values from
+# environment variables is a good way.
+import os
+OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID")
+OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET")
 ```
+
+Now you need a `client_id` and a `client_secret`. If you haven't registered
+with your OIDC provider yet and self-registration is allowed, you may run:
+
+```bash
+  pip install oidc-register
+  oidc-register http://oidc-provider.example.com
+```
+
+It will generate a `client_secrets.json` file that contains the `client_id` and
+`client_secret` values that you must use. With the example `settings.py`
+directives above, you can pass those values as environment variables
+(`OIDC_RP_CLIENT_ID` and `OIDC_RP_CLIENT_SECRET`) when you run the backend API
+(taiga-back).
+
 
 ### Taiga Front
 
-Create the directory structure for the new plugin
+Build the frontend plugin:
 
 ```bash
-  mkdir -p dist/plugins/fas-openid-auth
-  mkdir -p dist/plugins/fas-openid-auth/images/contrib
+  cd front
+  npm install
+  npm install gulp
+  ./node_modules/.bin/gulp build
 ```
 
-Download in your `dist/plugins/` directory of Taiga front the `taiga-contrib-fas-openid-auth` compiled code:
+If you already have Gulp on your system, you may just call `gulp build` instead
+of the last two lines.
+
+Copy the OIDC compiled code to the taiga-front directory:
 
 ```bash
-  cd dist/plugins/fas-openid-auth
-  wget "https://raw.githubusercontent.com/fedora-infra/taiga-contrib-fas-openid-auth/$(pip show taiga-contrib-fas-openid-auth | awk '/^version: /{print $2}')/front/dist/fas_openid_auth.js"
-  wget "https://raw.githubusercontent.com/fedora-infra/taiga-contrib-fas-openid-auth/$(pip show taiga-contrib-fas-openid-auth | awk '/^version: /{print $2}')/front/dist/fas-openid-auth.json"
+  mkdir -p $TAIGA_FRONT/dist/plugins/
+  cp -r dist/ $TAIGA_FRONT/dist/plugins/oidc-auth/
 ```
 
-Download in your `dist/plugins/fas-openid-auth/images/contrib` directory of Taiga front the `taiga-contrib-fas-openid-auth` Fedora icon:
-
-```bash
-  cd dist/plugins/fas-openid-auth/images/contrib
-  wget "https://raw.githubusercontent.com/fedora-infra/taiga-contrib-fas-openid-auth/$(pip show taiga-contrib-fas-openid-auth | awk '/^Version: /{print $2}')/front/images/contrib/fedora-logo.png"
-```
-
-Include in your dist/conf.json in the contribPlugins list the value `"/plugins/fas-openid-auth/fas-openid-auth.json"`:
+Include in your `$TAIGA_FRONT/dist/conf.json` in the `contribPlugins` list the
+value `"/plugins/oidc-auth/oidc-auth.json"`:
 
 ```json
 ...
-    "contribPlugins": ["/plugins/fas-openid-auth/fas-openid-auth.json"]
+    "contribPlugins": ["/plugins/oidc-auth/oidc-auth.json"]
 ...
 ```

@@ -1,7 +1,5 @@
-# Copyright (C) 2014 Andrey Antukh <niwi@niwi.be>
-# Copyright (C) 2014 Jesús Espino <jespinog@gmail.com>
-# Copyright (C) 2014 David Barragán <bameda@dbarragan.com>
 # Copyright (C) 2015 Ralph Bean <rbean@redhat.com>
+# Copyright (C) 2018 Aurelien Bompard <aurelien@bompard.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -18,4 +16,4 @@
 
 __version__ = (0, 0, 1)
 
-default_app_config = "taiga_contrib_fas_openid_auth.apps.TaigaContribFASOpenIDAuthAppConfig"
+default_app_config = "taiga_contrib_oidc_auth.apps.TaigaContribOIDCAuthAppConfig"

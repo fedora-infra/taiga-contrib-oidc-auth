@@ -1,19 +1,19 @@
 {
-  "name": "taiga-contrib-fas-openid-auth",
+  "name": "taiga-contrib-oidc-auth",
   "version": "0.0.1",
-  "description": "Taiga contrib plugin for fas-openid authentication",
+  "description": "Taiga contrib plugin for OIDC (OpenID Connect) authentication",
   "main": "index.js",
   "scripts": {
-    "build-jade": "node_modules/jade/bin/jade.js partials/contrib/fas_openid_auth.jade -o dist/",
-    "build-coffee": "cat coffee/fas_openid_auth.coffee dist/fas_openid_auth.html | node_modules/coffee-script/bin/coffee --compile --stdio > dist/fas_openid_auth.js",
+    "build-jade": "node_modules/jade/bin/jade.js partials/contrib/oidc_auth.jade -o dist/",
+    "build-coffee": "cat coffee/oidc_auth.coffee dist/oidc_auth.html | node_modules/coffee-script/bin/coffee --compile --stdio > dist/oidc_auth.js",
     "build": "npm run build-jade; npm run build-coffee"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/taigaio/taiga-contrib-fas-openid-auth"
+    "url": "https://github.com/taigaio/taiga-contrib-oidc-auth"
   },
   "keywords": [
-    "fas-openid",
+    "oidc",
     "taiga",
     "authentication",
     "plugin"
@@ -26,7 +26,8 @@
   "homepage": "https://github.com/taigaio/taiga-contrib-fas-openid-auth",
   "dependencies": {
     "coffee-script": "^1.8.0",
-    "jade": "^1.9.1"
+    "jade": "^1.9.1",
+    "url-join": "^4.0.0"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
