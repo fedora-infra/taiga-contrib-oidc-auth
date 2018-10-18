@@ -1,7 +1,8 @@
 Taiga contrib Fedora OIDC auth
 ==============================
 
-The Taiga plugin for Fedora's OIDC (OpenID Connect) provider.
+The Taiga plugin for Fedora's OIDC (OpenID Connect) provider. It has been
+forked off https://github.com/fedora-infra/taiga-contrib-fas-openid-auth.
 
 Flow diagram
 ------------
@@ -40,7 +41,7 @@ In your Taiga back python virtualenv install the pip package `taiga-contrib-oidc
   pip install taiga-contrib-oidc-auth
 ```
 
-Modify your settings/local.py and include the lines:
+Modify your `settings/local.py` and include the lines:
 
 ```python
 INSTALLED_APPS += [
@@ -51,6 +52,9 @@ INSTALLED_APPS += [
 AUTHENTICATION_BACKENDS = list(AUTHENTICATION_BACKENDS) + [
     "taiga_contrib_oidc_auth.oidc.TaigaOIDCAuthenticationBackend",
 ]
+
+# Add the OIDC urls
+ROOT_URLCONF = "settings.urls"
 
 # OIDC Settings
 OIDC_CALLBACK_CLASS = "taiga_contrib_oidc_auth.views.TaigaOIDCAuthenticationCallbackView"
@@ -68,6 +72,15 @@ OIDC_OP_USER_ENDPOINT = OIDC_BASE_URL + "/UserInfo"
 import os
 OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID")
 OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET")
+```
+
+Create a `settings/urls.py` containing:
+
+```python
+from taiga.urls import *
+urlpatterns += [
+    url(r"^oidc/", include("mozilla_django_oidc.urls")),
+]
 ```
 
 Now you need a `client_id` and a `client_secret`. If you haven't registered
