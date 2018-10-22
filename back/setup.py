@@ -19,7 +19,6 @@ setup(
         "django",
         "mozilla-django-oidc",
         "six",
-        "taiga-back",
     ],
     classifiers=[
         "Programming Language :: Python",
