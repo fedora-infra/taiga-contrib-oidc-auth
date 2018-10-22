@@ -21,7 +21,7 @@ add an OIDC
                            |
                            *--302----------> auth?
                                                |
-                   verify and store <--GET/302-*
+                   verify and store <----302---*
                     user in the db
                            |
   verify <----302----------*
