@@ -76,7 +76,6 @@ OIDCLoginButtonDirective = ($window, $params, $location, $config, $events, $conf
                 "authenticate/"
             )
             url += "?next=" + nextUrl
-            console.log(url)
             $window.location.href = url
 
         $scope.$on "$destroy", ->
@@ -88,7 +87,7 @@ OIDCLoginButtonDirective = ($window, $params, $location, $config, $events, $conf
         template: ""
     }
 
-module.directive("tgOIDCLoginButton", [
+module.directive("tgOidcLoginButton", [
    "$window", '$routeParams', "$tgLocation", "$tgConfig", "$tgEvents",
    "$tgConfirm", "$tgAuth", "$tgNavUrls", "tgLoader", "$rootScope",
    OIDCLoginButtonDirective])
