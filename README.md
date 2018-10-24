@@ -124,6 +124,19 @@ value `"/plugins/oidc-auth/oidc-auth.json"`:
 
 ```json
 ...
-    "contribPlugins": ["/plugins/oidc-auth/oidc-auth.json"]
+    "contribPlugins": ["/plugins/oidc-auth/oidc-auth.json"],
 ...
 ```
+
+If you want to mount the `mozilla_django_oidc` app on a different location in
+taiga-back, you can adjust the frontend by defining the `oidcMountPoint`
+variable in the `conf.json` file. Example:
+
+```json
+...
+    "oidcMountPoint": "/api/oidc",
+...
+```
+
+This value defaults to "/oidc", as used in the examples above. It may make your
+HTTP proxy configuration easier.
