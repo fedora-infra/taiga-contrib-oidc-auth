@@ -128,9 +128,26 @@ value `"/plugins/oidc-auth/oidc-auth.json"`:
 ...
 ```
 
+## Configuration
+
+You can change the button logo and text by setting the `oidcButtonText` and
+`oidcButtonImage` configuration values in `$TAIGA_FRONT/dist/conf.json`. For
+example, if you are using Fedora's OIDC provider, you may set:
+
+```json
+...
+    "oidcButtonText": "Fedora",
+    "oidcButtonImage": "fedora-logo.png",
+...
+```
+
+If you set a different logo, you must copy the file in
+`$TAIGA_FRONT/dist/plugins/oidc-auth/images/contrib/`.
+
 If you want to mount the `mozilla_django_oidc` app on a different location in
-taiga-back, you can adjust the frontend by defining the `oidcMountPoint`
-variable in the `conf.json` file. Example:
+taiga-back, you can change the moint point in `$TAIGA_BACK/settings/urls.py`
+and adjust the frontend by defining the `oidcMountPoint` variable in the
+`$TAIGA_FRONT/dist/conf.json` file. Example:
 
 ```json
 ...
@@ -138,5 +155,5 @@ variable in the `conf.json` file. Example:
 ...
 ```
 
-This value defaults to "/oidc", as used in the examples above. It may make your
-HTTP proxy configuration easier.
+The value defaults to `/oidc`, as used in the examples above. Mounting it
+inside the `/api` namespace may make your HTTP proxy configuration easier.

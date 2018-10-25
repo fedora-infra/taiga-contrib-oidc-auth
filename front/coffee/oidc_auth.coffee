@@ -81,6 +81,10 @@ OIDCLoginButtonDirective = ($window, $params, $location, $config, $events, $conf
         $scope.$on "$destroy", ->
             $el.off()
 
+        # Template context
+        $scope.buttonText = $config.get("oidcButtonText", "OpenID Connect")
+        $scope.buttonImage = $config.get("oidcButtonImage", "logo.gif")
+
     return {
         link: link
         restrict: "EA"

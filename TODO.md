@@ -1,8 +1,3 @@
-### Make it OIDC-generic
-
-Make it possible to set the button text and icon in the configuration.
-
-
 ### Token refresh
 
 Ref: https://mozilla-django-oidc.readthedocs.io/en/stable/installation.html#validate-id-tokens-by-renewing-them

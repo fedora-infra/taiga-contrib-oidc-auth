@@ -1,4 +1,8 @@
 div(tg-oidc-login-button)
-    a.button.button-auth(href="", title="Enter with your OIDC account")
-        img(src="/plugins/oidc-auth/images/contrib/fedora-logo.png")
-        span Fedora
+    a.button.button-auth(href="", title="Enter with your {{ buttonText }} account")
+        img(
+            src="/plugins/oidc-auth/images/contrib/{{ buttonImage }}",
+            alt="",
+            style="vertical-align:middle",
+        )
+        span= "{{ buttonText }}"
