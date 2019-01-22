@@ -1,0 +1,60 @@
+#!groovy
+
+def call(Closure body) {
+    def stages = [:]
+    def fedora_containers = [
+                    containerTemplate(name: 'jnlp',
+                                      image: "docker-registry.default.svc:5000/bstinson/agent-python3-tox:latest",
+                                      ttyEnabled: false,
+                                      args: '${computer.jnlpmac} ${computer.name}',
+                                      workingDir: "/workdir")
+    ]
+    def active_fedoras = ["f28", "f29", "rawhide"]
+
+    active_fedoras.each { fedora ->
+        stages["back-${fedora}"] = {
+            stage("back-${fedora}"){
+                container("${fedora}"){
+                    sh "cp -al ./back/ ../${fedora}/"
+                    dir( "../${fedora}/back" ){
+                        sh "rm -rf .tox"
+                        sh "tox"
+                    }
+                }
+            }
+        }
+        stages["front-${fedora}"] = {
+            stage("front-${fedora}"){
+                container("${fedora}"){
+                    sh "cp -al ./front/ ../${fedora}/"
+                    dir( "../${fedora}/front" ){
+                        sh "rm -rf node_modules"
+                        sh "npm run tests"
+                    }
+                }
+            }
+        }
+        fedora_containers.add(containerTemplate(name: "${fedora}",
+                                                image: "docker-registry.default.svc:5000/bstinson/python-tox:${fedora}",
+                                                ttyEnabled: true,
+                                                alwaysPullImage: true,
+                                                command: "cat",
+                                                workingDir: '/workdir'))
+    }
+
+    podTemplate(name: 'fedora-tox',
+                label: 'fedora-tox',
+                cloud: 'openshift',
+                containers: fedora_containers
+    ){
+        node('fedora-tox'){
+            ansiColor('xterm'){
+                stage ('checkout'){
+                    checkout scm
+                }
+
+                parallel stages
+            }
+        }
+    }
+}
