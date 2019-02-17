@@ -19,6 +19,7 @@ from django.apps import apps
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from taiga.auth.services import send_register_email
 from taiga.auth.signals import user_registered as user_registered_signal
+from taiga.base.utils.slug import slugify_uniquely
 
 
 # TODO: check groups? https://mozilla-django-oidc.readthedocs.io/en/stable/installation.html#advanced-user-verification-based-on-their-claims
@@ -34,14 +35,14 @@ class TaigaOIDCAuthenticationBackend(OIDCAuthenticationBackend):
             return self.UserModel.objects.none()
 
         AuthData = apps.get_model("users", "AuthData")
-        try:
-            auth_data = AuthData.objects.filter(
+        auth_data = AuthData.objects.filter(
                 key=self.AUTHDATA_KEY, user__email__iexact=email
-            )
-            return [ad.user for ad in auth_data]
+        )
 
-        except AuthData.DoesNotExist:
-            return self.UserModel.objects.none()
+        if not auth_data.count():
+            return self.UserModel.objects.filter(email__iexact=email)
+
+        return [ad.user for ad in auth_data]
 
     def get_username(self, claims):
         nickname = claims.get("nickname")
@@ -58,6 +59,8 @@ class TaigaOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         full_name = claims.get("name", username)
 
         AuthData = apps.get_model("users", "AuthData")
+        user_model = apps.get_model("users", "User")
+
         try:
             # User association exist?
             auth_data = AuthData.objects.get(key=self.AUTHDATA_KEY, value=username)
@@ -71,11 +74,12 @@ class TaigaOIDCAuthenticationBackend(OIDCAuthenticationBackend):
                 )
             except self.UserModel.DoesNotExist:
                 # Create a new user
+                username_unique = slugify_uniquely(username, user_model, slugfield="username")
                 user = self.UserModel.objects.create(
-                    email=email, username=username, full_name=full_name
+                    email=email, username=username_unique, full_name=full_name
                 )
                 AuthData.objects.create(
-                    user=user, key=self.AUTHDATA_KEY, value=username, extra={}
+                    user=user, key=self.AUTHDATA_KEY, value=username_unique, extra={}
                 )
 
                 send_register_email(user)
@@ -84,10 +88,16 @@ class TaigaOIDCAuthenticationBackend(OIDCAuthenticationBackend):
         return user
 
     def update_user(self, user, claims):
+        AuthData = apps.get_model("users", "AuthData")
         try:
-            user.full_name = claims["name"]
-        except KeyError:
-            pass
-        else:
-            user.save()
+            # User association exist?
+            auth_data = AuthData.objects.get(key=self.AUTHDATA_KEY, value=user.username)
+            user = auth_data.user
+        except AuthData.DoesNotExist:
+            AuthData.objects.create(
+                user=user, key=self.AUTHDATA_KEY, value=user.username, extra={}
+            )
+        user.full_name = claims.get("name")
+        user.save()
+
         return user
