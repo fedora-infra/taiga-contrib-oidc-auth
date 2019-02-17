@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from six.moves.urllib.parse import urlencode
+from django.utils.http import urlencode
 
 from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 from mozilla_django_oidc.utils import import_from_settings
@@ -28,8 +28,10 @@ def _make_login_url(data):
             "front": {"domain": "localhost:9001", "scheme": "http", "name": "front"},
         },
     )
+    filtered_dict = {k: v for k, v in data.items() if v is not None}
+
     return "{}://{}/login?{}".format(
-        SITES["front"]["scheme"], SITES["front"]["domain"], urlencode(data)
+        SITES["front"]["scheme"], SITES["front"]["domain"], urlencode(filtered_dict)
     )
 
 
